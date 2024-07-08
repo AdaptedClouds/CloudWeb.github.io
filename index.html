@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Chat</title>
+    <style>
+        /* Basic styling for demonstration purposes */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .chat-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .send-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Global Chat</h1>
+    <div class="chat-box" id="chatBox">
+        <!-- Chat messages will be displayed here -->
+    </div>
+    <input type="text" class="chat-input" id="userNameInput" placeholder="Your Name...">
+    <input type="text" class="chat-input" id="messageInput" placeholder="Type your message...">
+    <button class="send-btn" onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    // WebSocket connection to the server
+    const socket = new WebSocket('ws://localhost:3000'); // Replace with your server address
+
+    // Variable to store user's name
+    var userName = '';
+
+    // Handle incoming messages from server
+    socket.onmessage = function(event) {
+        var chatBox = document.getElementById('chatBox');
+        var message = JSON.parse(event.data);
+        var newMessageElement = document.createElement('div');
+        newMessageElement.innerHTML = '<strong>' + message.userName + ':</strong> ' + message.message;
+        chatBox.appendChild(newMessageElement);
+    };
+
+    // JavaScript for sending messages
+    function sendMessage() {
+        var userNameInput = document.getElementById('userNameInput');
+        var messageInput = document.getElementById('messageInput');
+        var enteredUserName = userNameInput.value.trim();
+        var message = messageInput.value.trim();
+        
+        if (enteredUserName === '') {
+            alert('Please enter your name.');
+            return;
+        }
+        
+        if (message === '') {
+            alert('Please enter a message.');
+            return;
+        }
+        
+        // Set the userName to the entered name
+        userName = enteredUserName;
+
+        // Send message to server
+        socket.send(JSON.stringify({ userName: userName, message: message }));
+
+        // Clear message input
+        messageInput.value = '';
+        messageInput.focus();
+    }
+</script>
+
+</body>
+</html>
